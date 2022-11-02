@@ -1,6 +1,6 @@
 {
   "name": "vite-wasm-zig",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "keywords": [
     "vite-plugin",
@@ -27,10 +27,14 @@
   },
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
+  "dependencies": {
+    "cross-spawn": "^7.0.3",
+    "which": "^2.0.1"
+  },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.2",
     "@types/node": "^18.11.9",
-    "cross-spawn": "^7.0.3",
+    "@types/which": "^2.0.1",
     "unbuild": "^0.9.4",
     "vite": "^3.2.2"
   },

@@ -1,17 +1,12 @@
-import { defineBuildConfig } from 'unbuild'
+import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
-  entries: [
-    'src/index',
-  ],
+  entries: ["src/index"],
   clean: false,
   declaration: true,
-  failOnWarn: false,
-  externals: [
-    'vite',
-  ],
+  externals: ["vite"],
   rollup: {
     emitCJS: true,
     inlineDependencies: true,
   },
-})
+});

@@ -1,5 +1,5 @@
 {
-    "include": ["src", "zig.d.ts"],
+    "include": ["src", "client.d.ts"],
     "exclude": ["**/*.spec.ts"],
     "compilerOptions": {
       "outDir": "dist",
