@@ -10,11 +10,16 @@ yarn add -D vite-wasm-zg
 
 ```js
 // vite.config.{js, ts}
-import zig from 'vite-wasm-zig'
+import zig from 'vite-wasm-zig';
 
-return {
-    plugins: {
-        zig()
+export default defineConfig(({ mode }) => {
+    return {
+        plugins: {
+            zig({
+                optimize: mode === 'production',
+                // Other options goes here
+            })
+        }
     }
 }
 ```
@@ -29,14 +34,16 @@ export fn add(a: i32, b: i32) i32 {
 
 ```js
 // index.{js,ts}
-import init from './main.zig?init'
+import init from "./main.zig?init";
 
 function someFunc() {
-    const importObject = { /* ... */};
+  const importObject = {
+    /* ... */
+  };
 
-    init(importObject).then(instance => {
-        console.log(instance.exports.add(1, 10))
-    })
+  init(importObject).then((instance) => {
+    console.log(instance.exports.add(1, 10));
+  });
 }
 ```
 
@@ -46,7 +53,7 @@ Add to `tsconfig.json`:
 
 ```json
 {
-    "types": ["vite/client", "vite-wasm-zig/client"]
+  "types": ["vite/client", "vite-wasm-zig/client"]
 }
 ```
 
