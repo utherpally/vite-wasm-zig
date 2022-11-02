@@ -49,3 +49,11 @@ Add to `tsconfig.json`:
     "types": ["vite/client", "vite-wasm-zig/client"]
 }
 ```
+
+## Semver
+
+Until 0.1 release, this package don't follow Semver for versioning
+
+## Lisence
+
+MIT
