@@ -3,7 +3,7 @@
 ## Install
 
 ```
-yarn add -D vite-wasm-zg
+yarn add -D vite-wasm-zig
 ```
 
 ## Usage
