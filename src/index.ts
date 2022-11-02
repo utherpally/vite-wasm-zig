@@ -15,7 +15,7 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
 
   return {
     name: "vite-wasm-zig",
-    async transform(code, id) {
+    async transform(code, id, options) {
       if (id.endsWith(ID_SUFFIX)) {
         const filePath = fsPathFromUrl(id);
         if (!tmpDir) {
@@ -70,9 +70,16 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
             );
           }
         }
-
         return {
-          code: `
+          code: options?.ssr ? `
+import * as fs from "node:fs/promises";
+
+export default async function init(opts) {
+  const bytes = await fs.readFile('${normalizePath(wasmPath)}');
+  const result = await WebAssembly.instantiate(bytes, opts);
+  return result.instance;
+}
+` : `
 import init from '${normalizePath(wasmPath)}?init';
 export default init;`,
           map: { mappings: "" },
