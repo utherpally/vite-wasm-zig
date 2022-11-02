@@ -9,6 +9,14 @@
   ],
   "author": "langbamit",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/langbamit/vite-wasm-zig.git"
+  },
+  "bugs": {
+    "url": "https://github.com/langbamit/vite-wasm-zig/issues"
+  },
+  "homepage": "https://github.com/langbamit/vite-wasm-zig/tree/main/#readme",
   "scripts": {
     "dev": "unbuild --stub",
     "build": "unbuild",
