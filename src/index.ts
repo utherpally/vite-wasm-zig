@@ -20,8 +20,12 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
   let { tmpDir = os.tmpdir(), zig = {}, optimize = false } = options;
   const { releaseMode = "small", strip = false, extraArgs = [], binPath } = zig;
 
-  const zigBinPath = binPath ?? "zig";
-  const version = spawnSync(zigBinPath, ["version"]).stdout.toString();
+  const zigBinPath = which.sync(binPath ?? "zig");
+  const versionCmd = spawnSync(zigBinPath, ["version"]);
+  if (versionCmd.error) {
+    throw new Error(`failed when execute "${zigBinPath} version" command.`);
+  }
+  const version = versionCmd.stdout.toString();
 
   const wasmOptPath = which.sync("wasm-opt", { nothrow: true });
   if (optimize && !wasmOptPath) {
