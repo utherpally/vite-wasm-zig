@@ -2,6 +2,8 @@
 
 ## Install
 
+Require `zig >=0.9.0` installed.
+
 ```
 yarn add -D vite-wasm-zig
 ```
@@ -16,7 +18,7 @@ export default defineConfig(({ mode }) => {
     return {
         plugins: {
             zig({
-                // Require `wasm-opt` installed on your PATH.
+                // Enable this option require `wasm-opt` installed on your $PATH.
                 optimize: mode === 'production',
                 // Other options goes here
             })

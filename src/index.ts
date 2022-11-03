@@ -5,13 +5,34 @@ import * as path from "node:path";
 import * as os from "node:os";
 import * as fs from "node:fs/promises";
 import which from "which";
-import { fsPathFromUrl, cleanUrl, getHash, normalizePath } from "./helper";
+import {
+  fsPathFromUrl,
+  cleanUrl,
+  getHash,
+  normalizePath,
+  ensureZigVersion,
+  atLeastZigVersion,
+} from "./helper";
 
 const ID_SUFFIX = ".zig?init";
 
 export default function zigWasmPlugin(options: Options = {}): Plugin {
   let { tmpDir = os.tmpdir(), zig = {}, optimize = false } = options;
   const { releaseMode = "small", strip = false, extraArgs = [], binPath } = zig;
+
+  const zigBinPath = binPath ?? "zig";
+  const version = spawnSync(zigBinPath, ["version"]).stdout.toString();
+
+  const wasmOptPath = which.sync("wasm-opt", { nothrow: true });
+  if (optimize && !wasmOptPath) {
+    throw new Error(
+      "Can't enable wasm optimize option, wasm-opt command not found. Make sure `wasm-opt` in your $PATH."
+    );
+  }
+
+  ensureZigVersion(version, ">= 0.9.0");
+
+  const zigSelfHosted = atLeastZigVersion(version, "0.10.0");
 
   return {
     name: "vite-wasm-zig",
@@ -27,7 +48,6 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
         const uniqWasmName = `${path.basename(filePath, ".zig")}.${hash}.wasm`;
         const wasmPath = path.join(tmpDir, uniqWasmName);
 
-        const command = binPath ?? "zig";
         const args = [
           "build-lib",
           "-dynamic",
@@ -37,17 +57,16 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
           `-Drelease-${releaseMode}`,
         ];
         if (strip) {
-          args.push("-dead_strip");
+          args.push(zigSelfHosted ? "-dead_strip" : "--strip");
         }
         if (extraArgs.length) {
           args.push.apply(args, extraArgs);
         }
         args.push(filePath);
-        const result = spawnSync(command, args, { stdio: "inherit" });
+        const result = spawnSync(zigBinPath, args, { stdio: "inherit" });
         if (result.error) throw result.error;
 
         if (optimize) {
-          const wasmOptPath = which.sync("wasm-opt", { nothrow: true });
           const optimizedFile = path.join(
             tmpDir,
             `wasm-optimized.${uniqWasmName}`
@@ -56,30 +75,25 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
           const extraArgs = Array.isArray(optimize)
             ? optimize
             : ["-Oz", "--strip-debug"];
-          if (wasmOptPath) {
-            const result = spawnSync(
-              wasmOptPath,
-              [wasmPath, ...args, ...extraArgs],
-              { stdio: "ignore" }
-            );
-            if (result.error) throw result.error;
-            await fs.rename(optimizedFile, wasmPath);
-          } else {
-            console.warn(
-              "Can't optimize .wasm file, wasm-opt command not found. Are you installed?"
-            );
-          }
+          const result = spawnSync(
+            wasmOptPath!,
+            [wasmPath, ...args, ...extraArgs],
+            { stdio: "inherit" }
+          );
+          if (result.error) throw result.error;
+          await fs.rename(optimizedFile, wasmPath);
         }
         return {
-          code: options?.ssr ? `
+          code: options?.ssr
+            ? `
 import * as fs from "node:fs/promises";
 
 export default async function init(opts) {
   const bytes = await fs.readFile('${normalizePath(wasmPath)}');
   const result = await WebAssembly.instantiate(bytes, opts);
   return result.instance;
-}
-` : `
+}`
+            : `
 import init from '${normalizePath(wasmPath)}?init';
 export default init;`,
           map: { mappings: "" },

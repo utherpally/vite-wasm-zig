@@ -1,7 +1,7 @@
 // Some utils function get from Vite
 import * as path from "node:path";
 import * as os from "node:os";
-import { createHash } from 'node:crypto'
+import { createHash } from "node:crypto";
 
 const queryRE = /\?.*$/s;
 const hashRE = /#.*$/s;
@@ -34,7 +34,6 @@ export function fsPathFromUrl(url: string): string {
   return fsPathFromId(cleanUrl(url));
 }
 
-
 export function getHash(text: string) {
-    return createHash('sha256').update(text).digest('hex').substring(0, 8)
+  return createHash("sha256").update(text).digest("hex").substring(0, 8);
 }

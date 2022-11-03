@@ -20,6 +20,8 @@
   "scripts": {
     "dev": "unbuild --stub",
     "build": "unbuild",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "prepublishOnly": "npm run build"
   },
   "type": "module",
@@ -37,14 +39,17 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "cross-spawn": "^7.0.3",
+    "semver": "^7.3.8",
     "which": "^2.0.1"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.2",
     "@types/node": "^18.11.9",
+    "@types/semver": "^7.3.13",
     "@types/which": "^2.0.1",
     "unbuild": "^0.9.4",
-    "vite": "^3.2.2"
+    "vite": "^3.2.2",
+    "vitest": "^0.24.5"
   },
   "peerDependencies": {
     "vite": "^3.0.0"
