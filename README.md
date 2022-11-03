@@ -48,6 +48,11 @@ function someFunc() {
     console.log(instance.exports.add(1, 10));
   });
 }
+// OR
+// This plugin support SSR, so top level await is OK
+const instance = await init(importObject)
+console.log(instance.exports.add(1, 10));
+export default instance.exports;
 ```
 
 ## With Typescript
