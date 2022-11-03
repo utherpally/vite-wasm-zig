@@ -1,8 +1,13 @@
+<p>
+  <a href="https://npmjs.com/package/vite-wasm-zig"><img src="https://img.shields.io/npm/v/vite-wasm-zig.svg" alt="npm package"></a>
+  <a href="https://ziglang.org/"><img src="https://img.shields.io/badge/zig-%3E%3D%200.9.0-yellow?logo=zig" alt="zig language"></a>
+  <a href="https://ziglang.org/"><img src="https://img.shields.io/badge/vite-%5E3.0.0-blue?logo=vite&&labelColor=ffffff" alt="zig language"></a>
+</p>
+
 # vite-wasm-zig
 
 ## Install
 
-Require `zig >=0.9.0` installed.
 
 ```
 yarn add -D vite-wasm-zig
