@@ -1,4 +1,4 @@
-import type { Plugin } from "vite";
+import type { Plugin, ResolvedConfig } from "vite";
 import type { Options } from "./types";
 import { sync as spawnSync } from "cross-spawn";
 import * as path from "node:path";
@@ -38,6 +38,8 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
 
   const zigSelfHosted = atLeastZigVersion(version, "0.10.0");
 
+  let config: ResolvedConfig;
+
   return {
     name: "vite-wasm-zig",
     async transform(code, id, options) {
@@ -47,6 +49,8 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
           // Fallback to current source dir
           tmpDir = path.dirname(filePath);
         }
+
+        const zigCacheDir = path.join(config.cacheDir, "zig-cache");
 
         const hash = getHash(cleanUrl(id));
         const uniqWasmName = `${path.basename(filePath, ".zig")}.${hash}.wasm`;
@@ -59,6 +63,8 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
           "wasm32-freestanding",
           `-femit-bin=${wasmPath}`,
           `-Drelease-${releaseMode}`,
+          `--cache-dir`,
+          zigCacheDir
         ];
         if (strip) {
           args.push(zigSelfHosted ? "-dead_strip" : "--strip");
@@ -104,5 +110,8 @@ export default init;`,
         };
       }
     },
+    configResolved: (resolvedConfig) => {
+      config = resolvedConfig
+    }
   };
 }
