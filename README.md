@@ -72,7 +72,7 @@ Add to `tsconfig.json`:
 
 ## Semver
 
-Until 0.1 release, this package don't follow Semver for versioning
+Until 1.0 release, this package don't follow Semver for versioning
 
 ## Lisence
 

@@ -1,8 +1,8 @@
 export type Options = {
   /**
-   * Temporary dir to store generated .wasm files during transform
+   * Temporary dir to store generated .wasm files and zig-cache during transform
    */
-  tmpDir?: string | false;
+   cacheDir?: string | false;
   /**
    * Enable optimize after building .wasm file from zig file.
    *
@@ -16,6 +16,7 @@ export type Options = {
     releaseMode?: "safe" | "small" | "fast";
     strip?: boolean;
     binPath?: string;
+    cacheDir?: string;
     extraArgs?: string[];
   };
 };

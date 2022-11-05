@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import { dirname, join } from "node:path";
 import semver from "semver";
 
 export * from "./vite";
@@ -28,4 +30,20 @@ export const ensureZigVersion = (zigVersion: string, range: string) => {
 export const atLeastZigVersion = (zigVersion: string, minVersion: string) => {
   const version = cleanVersion(zigVersion);
   return semver.satisfies(version, `>=${minVersion}`);
+};
+
+export const lookupFile = (
+  dir: string,
+  files: string[]
+): string | undefined => {
+  for (const file of files) {
+    const fullPath = join(dir, file);
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+      return fullPath;
+    }
+  }
+  const parentDir = dirname(dir);
+  if (parentDir != dir) {
+    return lookupFile(parentDir, files);
+  }
 };

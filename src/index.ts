@@ -12,13 +12,20 @@ import {
   normalizePath,
   ensureZigVersion,
   atLeastZigVersion,
+  lookupFile,
 } from "./helper";
 
 const ID_SUFFIX = ".zig?init";
 
 export default function zigWasmPlugin(options: Options = {}): Plugin {
-  let { tmpDir = os.tmpdir(), zig = {}, optimize = false } = options;
-  const { releaseMode = "small", strip = false, extraArgs = [], binPath } = zig;
+  let { cacheDir, zig = {}, optimize = false } = options;
+  const {
+    releaseMode = "small",
+    strip = false,
+    extraArgs = [],
+    binPath,
+    cacheDir: zigCacheDir,
+  } = zig;
 
   const zigBinPath = which.sync(binPath ?? "zig");
   const versionCmd = spawnSync(zigBinPath, ["version"]);
@@ -38,23 +45,17 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
 
   const zigSelfHosted = atLeastZigVersion(version, "0.10.0");
 
-  let config: ResolvedConfig;
-
+  let resolvedCacheDir: string;
+  let resolvedZigCacheDir: string;
   return {
     name: "vite-wasm-zig",
     async transform(code, id, options) {
       if (id.endsWith(ID_SUFFIX)) {
         const filePath = fsPathFromUrl(id);
-        if (!tmpDir) {
-          // Fallback to current source dir
-          tmpDir = path.dirname(filePath);
-        }
-
-        const zigCacheDir = path.join(config.cacheDir, "zig-cache");
 
         const hash = getHash(cleanUrl(id));
         const uniqWasmName = `${path.basename(filePath, ".zig")}.${hash}.wasm`;
-        const wasmPath = path.join(tmpDir, uniqWasmName);
+        const wasmPath = path.join(resolvedCacheDir, uniqWasmName);
 
         const args = [
           "build-lib",
@@ -64,7 +65,7 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
           `-femit-bin=${wasmPath}`,
           `-Drelease-${releaseMode}`,
           `--cache-dir`,
-          zigCacheDir
+          resolvedZigCacheDir,
         ];
         if (strip) {
           args.push(zigSelfHosted ? "-dead_strip" : "--strip");
@@ -78,7 +79,7 @@ export default function zigWasmPlugin(options: Options = {}): Plugin {
 
         if (optimize) {
           const optimizedFile = path.join(
-            tmpDir,
+            resolvedCacheDir,
             `wasm-optimized.${uniqWasmName}`
           );
           const args = ["-o", optimizedFile];
@@ -110,8 +111,19 @@ export default init;`,
         };
       }
     },
-    configResolved: (resolvedConfig) => {
-      config = resolvedConfig
-    }
+    configResolved: async (config) => {
+      const pkgPath = lookupFile(config.root, ["package.json"]);
+      resolvedCacheDir = cacheDir
+        ? path.resolve(config.root, cacheDir)
+        : pkgPath
+        ? path.join(path.dirname(pkgPath), "node_modules/.vite-wasm-zig")
+        : path.join(config.root, ".vite-wasm-zig");
+
+      resolvedZigCacheDir = zigCacheDir
+        ? path.join(config.root, zigCacheDir)
+        : path.join(resolvedCacheDir, "zig-cache");
+
+      await fs.mkdir(resolvedZigCacheDir, { recursive: true });
+    },
   };
 }
